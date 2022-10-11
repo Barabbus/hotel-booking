@@ -4,8 +4,7 @@ import SmallCard from '../components/cards/SmallCard'
 
 const Home = () => {
   const [hotels, setHotels] = useState([])
-
-  // Load hotels
+  
   useEffect(() => {
     loadAllhotels()
   }, [])
