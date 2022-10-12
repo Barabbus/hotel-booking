@@ -1,5 +1,5 @@
 import express from 'express'
-// import { readdirSync } from 'fs'
+import { readdirSync } from 'fs'
 import cors from 'cors'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
