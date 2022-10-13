@@ -1,4 +1,6 @@
-import { DatePicker, Select, Form } from 'antd'
+import { useState } from 'react'
+import { DatePicker, Select } from 'antd'
+import { toast } from 'react-toastify'
 import moment from 'moment'
 
 const { Option } = Select
@@ -12,6 +14,7 @@ const HotelCreateForm = ({
      
 }) => {
     const { title, content, price, location } = values
+    const [saveButton, setSaveButton] = useState(false)
 
   return (
       <form onSubmit={handleSubmit}>
@@ -77,7 +80,21 @@ const HotelCreateForm = ({
               placeholder="From date"
               className="form-control m-2"               
               onChange={(dateString) => {                  
-                  setValues({ ...values, from: dateString })
+                  if (moment(dateString).isSame(values.to, 'day')) {
+                      setSaveButton(true)
+                      toast.error("Error: Cannot select duplicate dates")
+                      setTimeout(function () {
+                          setTimeout(window.location.reload())
+                      }, 3000)
+                  } else if (moment(dateString).isAfter(values.to)) {
+                      setSaveButton(true)
+                      toast.error("Error: Cannot select a from date that is after the end date")
+                      setTimeout(function () {
+                          setTimeout(window.location.reload())
+                      }, 3000)
+                  } else {
+                      setValues({ ...values, from: dateString })
+                  }
               }}
               // Prevent user from selecting dates that are in the past
               // (subtract 1 day from the current date and disable all dates prior to the current date)
@@ -91,11 +108,19 @@ const HotelCreateForm = ({
               placeholder="To date"
               className="form-control m-2"
               onChange={(dateString) => {                  
-                  if (moment(dateString).isSame(values.from, 'day')) {                      
-                      window.location.reload()                    
+                  if (moment(dateString).isSame(values.from, 'day')) {
+                      setSaveButton(true)
+                      toast.error("Error: Cannot select duplicate dates")
+                      setTimeout(function () {
+                          setTimeout(window.location.reload())
+                      }, 3000)                      
                   }
-                  if (moment(dateString).isBefore(values.from)) {                      
-                      window.location.reload() 
+                  if (moment(dateString).isBefore(values.from)) { 
+                      setSaveButton(true)
+                      toast.error("Error: Cannot select a to date that is before the from date")  
+                      setTimeout(function () {
+                          setTimeout(window.location.reload())
+                      }, 3000)                      
                   } else {                      
                       setValues({ ...values, to: dateString })
                   }                    
@@ -107,7 +132,7 @@ const HotelCreateForm = ({
               }              
           />
 
-          <button className="btn btn-outline-primary m-2">Save</button>
+          <button disabled={saveButton} className="btn btn-outline-primary m-2">Save</button>
       </form>
   )
 }

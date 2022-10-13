@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { DatePicker, Select } from 'antd'
 import moment from 'moment'
+import { toast } from 'react-toastify'
 
 const { Option } = Select
 
@@ -12,6 +14,8 @@ const HotelEditForm = ({
     
 }) => {
     const { title, content, price, bed, from, to, location } = values
+    const [saveButton, setSaveButton] = useState(false)
+
     return (
         <form onSubmit={handleSubmit}>
             <div className="form-group">
@@ -80,11 +84,29 @@ const HotelEditForm = ({
             {from && (                
                 <DatePicker
                     size="large"
+                    defaultValue={moment(from, "YYYY-MM-DD")}
                     format="DD-MM-YYYY"
-                    placeholder="From date"
+                    placeholder={values.from}
                     className="form-control m-2"
-                    onChange={(dateString) => {                        
-                        setValues({ ...values, from: dateString })
+                    onChange={(dateString) => {                         
+                        dateString = moment(dateString, "DD-MM-YYYY")
+                        dateString.set({ h: 15, m: 11 })
+                        if (moment(dateString).isSame(values.to, 'day')) {
+                            setSaveButton(true)
+                            toast.error("Error: Cannot select duplicate dates")
+                            setTimeout(function () {
+                                setTimeout(window.location.reload())
+                            }, 3000)
+                        } else if (moment(dateString).isAfter(values.to, 'day')) {
+                            setSaveButton(true)
+                            toast.error("Error: Cannot select a from date that is after the end date")
+                            setTimeout(function () {
+                                setTimeout(window.location.reload())
+                            }, 3000)
+                        } else { 
+                            dateString = moment(dateString).format()
+                            setValues({ ...values, from: dateString })
+                        }
                     }}                    
                     disabledDate={(current) =>                         
                         current && current.valueOf() < moment().subtract(1, "days")
@@ -95,27 +117,37 @@ const HotelEditForm = ({
             {to && (                
                 <DatePicker
                     size="large"
+                    defaultValue={moment(to, "YYYY-MM-DD")}
                     format="DD-MM-YYYY"
-                    placeholder="To date"
+                    placeholder={values.to}
                     className="form-control m-2"
                     onChange={(dateString) => {
+                        dateString = moment(dateString, "DD-MM-YYYY")
+                        dateString.set({ h: 18, m: 15 })
                         if (moment(dateString).isSame(values.from, 'day')) {
-                            window.location.reload()
-                        }
-                        if (moment(dateString).isBefore(values.from)) {
-                            window.location.reload()
+                            setSaveButton(true)
+                            toast.error("Error: Cannot select duplicate dates")
+                            setTimeout(function () {
+                                setTimeout(window.location.reload())
+                            }, 3000)
+                        } else if (moment(dateString).isBefore(values.from)) {
+                                setSaveButton(true)
+                                toast.error("Error: Cannot select a to date that is before the from date")
+                                setTimeout(function () {
+                                    setTimeout(window.location.reload())
+                                }, 3000)
                         } else {                            
                             setValues({ ...values, to: dateString })
                         }
-                        // setValues({ ...values, to: dateString })
-                    }}
+                      }                        
+                    }
                     disabledDate={(current) =>
                         current && current.valueOf() < moment().subtract(1, "days")
                     }
                 />
             )}
 
-            <button className="btn btn-outline-primary m-2">Save</button>
+            <button disabled={saveButton} className="btn btn-outline-primary m-2">Save</button>
         </form>
 
     )
